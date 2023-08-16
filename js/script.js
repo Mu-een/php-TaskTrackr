@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var todoListNonce = '<?php echo esc_js(todo_list_data.nonce); ?>'; // Update the nonce name here as well
-
+    var todoListNonce = todo_list_data.nonce;
 
     console.log('Nonce:', todoListNonce);
     console.log('AJAX URL:', todo_list_data.ajax_url);
+
     // Add Task
     document.getElementById('add-task').addEventListener('click', function() {
         var newTask = document.getElementById('new-task').value;
@@ -22,28 +22,58 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             };
-            xhr.send('action=add_task&task=' + encodeURIComponent(newTask));
+            xhr.send('action=add_task&nonce=' + todoListNonce + '&task=' + encodeURIComponent(newTask));
         }
     });
 
-    // Refresh Task List
-    function refreshTaskList() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', todo_list_data.ajax_url + '?action=get_task_list', true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                var response = JSON.parse(xhr.responseText);
-                if (response.success) {
-                    console.log('Task list:', response.data.task_list); // Add this line for debugging
-                    document.getElementById('task-list').innerHTML = response.data.task_list;
-                } else {
-                    console.error('Error: ' + response.data.message);
-                }
+// Refresh Task List
+function refreshTaskList() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', todo_list_data.ajax_url + '?action=get_task_list', true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                document.getElementById('task-list').innerHTML = response.data.task_list;
+                addDeleteButtonListeners();
+            } else {
+                console.error('Error: ' + response.data.message);
             }
-        };
-        xhr.send();
-    }
+        }
+    };
+    xhr.send();
+}
 
-    // Call refreshTaskList initially
-    refreshTaskList();
+// Function to add event listeners for delete buttons
+function addDeleteButtonListeners() {
+    var deleteButtons = document.querySelectorAll('.delete-task');
+    deleteButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var taskId = this.getAttribute('data-task-id');
+            deleteTask(taskId);
+        });
+    });
+}
+
+// Function to delete a task
+function deleteTask(taskId) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', todo_list_data.ajax_url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                refreshTaskList(); // Refresh the task list after deleting a task
+            } else {
+                console.error('Error: ' + response.data.message);
+            }
+        }
+    };
+    xhr.send('action=delete_task&nonce=' + todoListNonce + '&task_id=' + taskId);
+}
+
+// Call refreshTaskList initially
+refreshTaskList();
+
 });
