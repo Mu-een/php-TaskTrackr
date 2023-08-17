@@ -2,7 +2,7 @@
 /*
 Plugin Name: TaskTrackr
 Description: A simple task management system
-Version: 3.1
+Version: 3.2
 Author: Mu-een Slamat
 */
 
