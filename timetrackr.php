@@ -2,7 +2,7 @@
 /*
 Plugin Name: TaskTrackr
 Description: A simple task management system
-Version: 3.0
+Version: 3.1
 Author: Mu-een Slamat
 */
 
@@ -72,8 +72,6 @@ function get_task_list_callback() {
 add_action('wp_ajax_get_task_list', 'get_task_list_callback');
 add_action('wp_ajax_nopriv_get_task_list', 'get_task_list_callback');
 
-
-
 // AJAX handler for deleting a task
 function delete_task_callback() {
     if (isset($_POST['nonce']) && wp_verify_nonce($_POST['nonce'], 'new-todo-list-nonce')) {
@@ -91,6 +89,7 @@ function delete_task_callback() {
     }
 }
 add_action('wp_ajax_delete_task', 'delete_task_callback');
+add_action('wp_ajax_nopriv_delete_task', 'delete_task_callback'); // For non-logged-in users
 
 
 // Localize the JavaScript file
